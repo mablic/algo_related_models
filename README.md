@@ -14,4 +14,6 @@ This function do the graphing of a ticker with the moving average (mvs) user def
 Sample output:
 
 graph_data('spy', 10, 20, 100)
+Below is the sample image out from the function. It created 10, 20, 100 days moving average of stock spy for the period of user defined period from the get_data function.
+
 ![sample spy](https://user-images.githubusercontent.com/19805677/49915752-ce83f180-fe5c-11e8-9ebc-23a78dbd4a7b.JPG)
