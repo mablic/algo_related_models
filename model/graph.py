@@ -1,29 +1,19 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+
 import pandas as pd
-import pandas_datareader as web
-import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
-import os
+import model.readdata as read
 from mpl_finance import candlestick_ohlc
-from datetime import datetime as dt
 
 
 COLOR = ['b', 'g', 'r', 'c', 'm', 'y', 'k', 'w']
 
 
-def get_data(ticket, startdate, enddate, source='yahoo'):
-    df=web.DataReader(ticket, source, startdate, enddate)
-    df.to_csv(os.getcwd() + '\\%sdata.csv' % ticket)
-
-
-def read_data(ticker):
-    df = pd.read_csv(os.getcwd() + '\\%sdata.csv' %ticker, index_col=None)
-    return df
-
-
 def graph_data(ticker, *mvs):
     try:
-        df_ohlc = read_data(ticker)
+        df_ohlc = read.read_data(ticker)[ticker]
     except ValueError:
         print('No csv file for ticker %s.' % ticker)
 
@@ -50,6 +40,7 @@ def graph_data(ticker, *mvs):
     plt.setp(ax1.get_xticklabels(), visible=False)
 
     ax1.set_title('%s historical stock prices' % ticker)
+    ax1.xaxis.set_visible(False)
     ax1.legend(loc='best')
     for label in ax2.xaxis.get_ticklabels():
         label.set_rotation(45)
