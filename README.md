@@ -34,7 +34,6 @@ Function included:
 3. total_capital: return historical pnl (net pnl) plus running capital.
 4. graph_pnl: graph the historical pnl with line chart and bar chart. User can aggregate the segmentaion by applying pandas time function. For instance: D: day, M: month. Due to the limitation of the data, the least segmentation is by day.
 5. graph_pnl example below:
-
 ![figure_1](https://user-images.githubusercontent.com/19805677/51452618-d9099480-1d00-11e9-8c1b-7880e11a4fad.png)
 
 Excel model:
