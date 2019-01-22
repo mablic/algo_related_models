@@ -6,24 +6,44 @@ import matplotlib.pyplot as plt
 
 class MvTrade:
 
-    def __init__(self, ticker, start_date, end_date, fst_mv, slw_mv, p_size=1000, trade_lot=1):
+    __slots__ = ('ticker', 'start_date', 'end_date', 'fst_mv', 'slw_mv', 'p_size', 'trade_lot')
+
+    def __init__(self, ticker, start_date, end_date, p_size=1000, trade_lot=1):
         self.ticker = ticker
         self.start_date = start_date
         self.end_date = end_date
-        self.fst_mv = fst_mv
-        self.slw_mv = slw_mv
+        # self.fst_mv = fst_mv
+        # self.slw_mv = slw_mv
         self.p_size = p_size
         self.trade_lot = trade_lot
         try:
             load.get_data_by_tickets(self.start_date, self.end_date, self.ticker)
-        except ValueError:
-            raise "Load data error for ticker %s." % self.ticker
+        except TypeError:
+            raise "Load data error for ticker %s." % ticker
+
+    @property
+    def mv(self):
+        return self.fst_mv, self.slw_mv
+
+    @mv.setter
+    def mv(self, fst_mv, slw_mv):
+        if fst_mv <= 0 or fst_mv > 100:
+            raise ValueError('Fast moving average not valid.')
+        if slw_mv <= 0 or slw_mv > 100:
+            raise ValueError('Slow moving average not valid.')
 
     def mv_position(self):
         try:
             df = read.read_data(self.ticker)[self.ticker]
         except ValueError:
-            raise "No data for ticker %s." % self.ticker
+            print("No data for ticker %s." % self.ticker)
+
+        try:
+            isinstance(self.fst_mv, int)
+            isinstance(self.slw_mv, int)
+        except AttributeError:
+            print("Moving average value not valid.")
+            raise
 
         # calc moving average
         df['fst_mv'] = df['Close'].rolling(self.fst_mv).mean()
@@ -100,7 +120,12 @@ class MvTrade:
 
 
 if __name__ == '__main__':
-    testTrade = MvTrade('spy', '2018-1-1', '2018-12-31', 10, 20, 1000, 1)
+
+    testTrade = MvTrade('spy', '2018-1-1', '2018-12-31', 1000, 1)
+    testTrade.fst_mv = 10
+    testTrade.slw_mv = 20
     testTrade.graph_pnl()
+
+    # testTrade.graph_pnl()
     # print(testTrade.pnl())
     # print("Total Capital is : %.2f." % testTrade.total_capital())
