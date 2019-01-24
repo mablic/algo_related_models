@@ -1,36 +1,46 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+
+from multiprocessing import Pool
 import model.mvTradeModel as mvModel
 import pandas as pd
+
 
 class BackTester:
 
     # __slots__ = ('model', 'ticker', 'start', 'end', 'p_size', 'trade_lot')
 
-    def __init__(self, start, end):
-        self.start = start
-        self.end = end
+    def __init__(self, ticker, start_date, end_date, p_size=1000, lot_size=1):
+        self.mvModel = mvModel.MvTrade(ticker, start_date, end_date, p_size, lot_size)
 
-    def add_model(self, model):
-        try:
-            isinstance(model, mvModel.MvTrade)
-        except TypeError:
-            print("Model is not valid.")
+    def add_model(self, start, end):
 
-        ret = pd.DataFrame(columns=['fst_mv', 'slw_mv', 'pnl'])
-        for i in range(self.start, self.end):
-            for j in range(i+1, self.end + 1):
-                model.fst_mv = i
-                model.slw_mv = j
-                ret = ret.append({'fst_mv': i, 'slw_mv': j, 'pnl': model.total_pnl()}, ignore_index=True)
+        ret = []
+        for i in range(start, end):
+            for j in range(i+1, end + 1):
+                self.mvModel.fst_mv = i
+                self.mvModel.slw_mv = j
+                ret.append([i, j, self.mvModel.total_pnl()])
+        # print(self.test_output.head())
+        return ret
 
+    def process_test(self, start, end):
+        ret = pd.DataFrame(columns=['fst_mv', 'slw_mv', 'ttl_pnl'])
+        cnt = (end - start) // 4
+        all_task = [(i, i + cnt) for i in range(start, end, cnt)]
+        results = Pool(4).starmap(self.add_model, all_task)
+
+        for i in results:
+            for j in i:
+                # print(j)
+                ret.loc[len(ret)] = j
         return ret
 
 
 if __name__ == '__main__':
 
-    testTrade = mvModel.MvTrade('spy', '2018-1-1', '2018-12-31', 1000, 1)
-    testTrade.fst_mv = 10
-    testTrade.slw_mv = 20
-
-    test = BackTester(5, 10)
-    df = test.add_model(testTrade)
-    print(df)
+    test = BackTester('spy', '2018-1-1', '2018-12-31')
+    test_ret = test.process_test(1, 20)
+    print(test_ret)
+    # df = test.add_model(testTrade)
+    # print(df)
