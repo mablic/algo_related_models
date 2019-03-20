@@ -38,3 +38,12 @@ Function included:
 
 Excel model:
 Moving average trading algorithm by using spv data from 2018-01-01 to 2018-12-31. Fast moving average is 10 days, slow moving average is 20 days. Demonstration of how the calculation works.
+
+3.  Risk management:
+
+The risk calculation is based on the daily return of the stock's close price (today price - prior date price) / today price. 
+
+This model includes risk management function. Convariance matrix calculation and Monte Carlos simulation. Both methods can return VaR ( Value at Risk) for user defined portfolios. 
+
+The convariance matrix calculation takes the position of the user's portfolio and the convariance of the portfolio.
+The Monte Carlos simulation takes the Cholesky Decomposition matrix of the convariance with the random normal distribution.
