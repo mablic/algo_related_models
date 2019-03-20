@@ -31,38 +31,44 @@ class RiskModel:
         res = pos.dot(cov)
         res = res.dot(np.transpose(pos))
         # return the confident level VaR
-        return confidentLevel * math.sqrt(res)
+        return -1 * confidentLevel * math.sqrt(res)
 
 
-#   still in process.
-#     def monteCarlos(self):
-#         df = pd.DataFrame()
-#         price = []
-#
-#         for key, itm in self.all_data.items():
-#             df[key] = (itm['Adj Close'] - itm['Adj Close'].shift(1)) / itm['Adj Close']
-#             price.append(itm['Adj Close'].iloc[-1])
-#
-#         #covariance
-#         cov = df.cov()
-#         #engValue & engVector
-#         engValue, engVector = np.linalg.eig(cov)
-#         #sqrt root of the diagonal engValue
-#         diagonal = np.sqrt(np.diag(engValue))
-#         res = diagonal.dot(np.transpose(engVector))
-#         randInt = np.random.rand(1000, 2)
-#         res = randInt.dot(res)
-#         res = pd.DataFrame(res)
-#
-#         return res.cov(), cov
+#   monte carlos simulation
+    def monteCarlos(self, nums, confidentLevel, *args):
+        df = pd.DataFrame()
+        price = []
+
+        for key, itm in self.all_data.items():
+            df[key] = (itm['Adj Close'] - itm['Adj Close'].shift(1)) / itm['Adj Close']
+            price.append(itm['Adj Close'].iloc[-1])
+
+        meanVar = df.mean(axis=0)
+        cov = df.cov()
+        # Cholesky Decomposition
+        cholesky = np.linalg.cholesky(cov)
+
+        ret = pd.DataFrame(columns=[x for x in df.columns.values])
+        for i in range(nums):
+            randomVar = [np.random.normal() for _ in range(len(df.columns.values))]
+            tmp = np.transpose(meanVar + np.transpose(randomVar).dot(cholesky))
+            ret = ret.append(tmp, ignore_index=True)
+        # calculate the monte carlos number by applying the current position
+        pos = np.array([arg for arg in args])
+        pos = np.multiply(pos, np.array(price))
+        ret *= pos
+        ret['combine'] = ret.sum(axis=1)
+        ret = ret.sort_values(by=['combine'])
+        # return the value with confidentlevel that user defined
+        return ret['combine'].iloc[int(len(ret) * confidentLevel)]
 
 
 if __name__ == '__main__':
 
     testObj = RiskModel('2018-1-1', '2018-12-31', 'AAPL', 'IBM')
-    print(testObj.monteCarlos())
-    # position = [100, 100]
-    # print(testObj.calcVaR(2.33, position))
+    position = [100, 100]
+    print(testObj.monteCarlos(100, 0.05, 100, 100))
+    print(testObj.calcVaR(2.33, position))
     # a = pd.DataFrame(np.random.rand(2, 2))
     # cov = a.cov()
     # rand = np.random.rand(20000, 2)
