@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from multiprocessing import Pool
-import model.mvTradeModel as mvModel
+import model.StrategyModel as mvModel
 import pandas as pd
 
 
