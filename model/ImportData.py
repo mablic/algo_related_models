@@ -8,6 +8,8 @@ from Ticker import Ticker
 from bs4 import BeautifulSoup
 
 
+# class to import the s&p 500 ticker from the wikipedia. 
+# request to graph the ticker symbol from the wikipedia, the result can feed into the UI
 class Data():
 
     def __init__(self) -> None:
@@ -16,6 +18,7 @@ class Data():
         jsonData = json.load(f)
         self.wikiPath = jsonData['wiki_path']
     
+    # this is the function to read data from the wikipedia.
     def read_wiki(self):
 
         try:
@@ -33,9 +36,12 @@ class Data():
         except:
             raise "read wiki error!"
 
+    # function to return all the tickers symbol
     def get_all_ticker(self):
+        tickerName = []
         for i in self.__tickerDict.keys():
-            print('Current Ticker is: %s' % self.__tickerDict[i].get_ticker_name())
+            tickerName.append(self.__tickerDict[i].get_ticker_name())
+        return tickerName
 
     def check_if_ticker_exists(self, ticker):
         return ticker in self.__tickerDict

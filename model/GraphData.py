@@ -1,13 +1,16 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+from lib2to3.pgen2.pgen import DFAState
 from matplotlib import ticker
 import pandas as pd
 import mplfinance as mpf
 from datetime import datetime
 from Ticker import Ticker
+import matplotlib.pyplot as plt
+from StrategyModel import MovingAverageStrategy
 
-
+# Type for the chart
 class PlotType:
     candle = 'candle'
     line = 'line'
@@ -17,11 +20,14 @@ class PlotType:
 
 class GraphData:
     
+    # GraphData class only graph the base
+    # This is the base class for the child class
     def __init__(self) -> None:
         self.__ticker = None
         self.__startDate = '1990-01-01'
         self.__endDate = '1990-01-01'
 
+    # set the chart data, it takes the start date, end date and the type as optional from the Type class above
     def set_data(self, ticker, start, end, type='line'):
         format = "%Y-%m-%d"
         try:
@@ -43,23 +49,34 @@ class GraphData:
         else:
             self.__ticker.set_data_range(self.__startDate, self.__endDate)
         mpf.plot(self.__ticker.get_data(), type=self.__type, volume=True)
+    
+    def graph_pnl(self, df):
+        plt.plot(df)
+        plt.show()
 
+# this is a child class for the GraphData class
+# this is a base class for further graphing, example moving average
+# future implementation can take places from this base class
 class DecoratorGraph(GraphData):
 
     def __init__(self, graphData) -> None:
         super().__init__()
         self._graphData = graphData
         self._ticker, self._type = graphData.get_plot_base()
-    
+
+# this is a child class for the GraphData class
+# this class plot the chart with the moving average line
 class DecoratorMV(DecoratorGraph):
     
     def set_plot(self, graphData) -> None:
         super().__init__(graphData)
         self.__mv = []
 
+    # this is for adding mvoing average line into the chart
     def add_mv(self, mv):
         self.__mv.append(mv)
 
+    # plot the chart with the overwrittern class of the base class
     def graph_plot(self):
         mpf.plot(self._ticker.get_data(), type=self._type, mav=tuple(self.__mv), volume=True)
 
@@ -77,4 +94,7 @@ if __name__ == '__main__':
     mv.set_plot(g)
     mv.add_mv(3)
     mv.add_mv(5)
-    mv.graph_plot()
+    # mv.graph_plot()
+
+    mv = MovingAverageStrategy(t, '2021-01-01','2021-12-31')
+    df = mv.run_back_tester(10)
