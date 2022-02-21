@@ -3,6 +3,7 @@
 
 import json
 import pandas
+import requests
 import os
 from datetime import datetime, timedelta
 
@@ -26,16 +27,16 @@ class Ticker:
     def import_data_range(self, startDate, endDate):
         format = "%Y-%m-%d"
         try:
-            # data = requests.get('https://api.polygon.io/v2/aggs/ticker/' + self._name 
-            #     + '/range/1/day/' + startDate + '/' + endDate + '?adjusted=true&sort=asc&limit=120&apiKey=' + self.configKey).json()
+            data = requests.get('https://api.polygon.io/v2/aggs/ticker/' + self.__name 
+                + '/range/1/day/' + startDate + '/' + endDate + '?adjusted=true&sort=asc&limit=120&apiKey=' + self.configKey).json()
             datetime.strptime(startDate, format)
             datetime.strptime(endDate, format)
             format = "%Y-%m-%d"
             yrsDiff = (datetime.strptime(endDate, format) - datetime.strptime(startDate, format)).total_seconds() // 31536000
             if yrsDiff > 2:
                 raise "Invalid data range, can't load data more than 2 years."
-            f = open(os.getcwd() + '/model/data/AAPL.json')
-            data = json.load(f)
+            # f = open(os.getcwd() + '/model/data/AAPL.json')
+            # data = json.load(data)
             df = pandas.DataFrame(data['results'])
             df = df[['t','o','h','l','c','v','vw','n']]
             df.rename(columns={'t': 'Date','o': 'Open','h': 'High','l': 'Low','c': 'Close','v': 'Volume'}, inplace=True)
